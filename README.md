@@ -26,7 +26,6 @@
   - [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
   - [📜 License](#-license)
   - [🙏 Special Thank You](#-special-thank-you)
-  - [📧 Contact](#-professional-collaborations)
 
 ## 🎯 Advantages
 
