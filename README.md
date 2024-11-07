@@ -17,6 +17,7 @@
     - [Encoder](#encoder-host-writing-the-message)
     - [Decoder](#decoder-host-reading-the-message)
     - [Cleanup Process](#cleanup-process)
+  - [🎓 Example: Encoding and Decoding](#)
   - [⚙️ Installation](#%EF%B8%8F-installation)
   - [📝 Usage](#-usage)
     - [Encoder Setup](#encoder-setup)
@@ -79,6 +80,133 @@
 - **Purpose**:
   - Ensures that no unnecessary ports remain open, maintaining system security.
   - Confirms to the encoder that the message was successfully received and decoded.
+
+## 🎓 Example: Encoding and Decoding "hello, world!"
+
+Let's walk through an example of how **HM-Nmap** encodes and decodes the message `"hello, world!"`.
+
+### 📝 Encoding the Message
+
+1. **Run the Encoder Script**
+
+   ```
+   python3 encoder.py <decoder_ip> <shared_token>
+   ```
+
+   - **`<decoder_ip>`**: IP address of the decoder machine.
+   - **`<shared_token>`**: Pre-shared secret token for authentication.
+
+2. **Input the Message**
+```
+[INPUT] Enter the message to encode (max 100 characters): hello, world!
+```
+
+3. **Port Calculation**
+
+Each character in the message is converted to its ASCII value and mapped to a unique port number using the formula:
+```
+port = base_port + (position_in_message * 256) + ASCII_value
+```
+   - **`base_port`**: 10000
+   - **`position_in_message`**: Zero-based index of the character in the message.
+   - **`ASCII_value`**: ASCII code of the character.
+
+| Position | Character | ASCII Value | Port Calculation                         | Port Number |
+|----------|-----------|-------------|------------------------------------------|-------------|
+| 0        | h         | 104         | 10000 + (0 * 256) + 104 = 10104          | 10104       |
+| 1        | e         | 101         | 10000 + (1 * 256) + 101 = 10357          | 10357       |
+| 2        | l         | 108         | 10000 + (2 * 256) + 108 = 10620          | 10620       |
+| 3        | l         | 108         | 10000 + (3 * 256) + 108 = 10876          | 10876       |
+| 4        | o         | 111         | 10000 + (4 * 256) + 111 = 11135          | 11135       |
+| 5        | ,         | 44          | 10000 + (5 * 256) + 44 = 11224           | 11224       |
+| 6        |           | 32          | 10000 + (6 * 256) + 32 = 11568           | 11568       |
+| 7        | w         | 119         | 10000 + (7 * 256) + 119 = 11911          | 11911       |
+| 8        | o         | 111         | 10000 + (8 * 256) + 111 = 12159          | 12159       |
+| 9        | r         | 114         | 10000 + (9 * 256) + 114 = 12318          | 12318       |
+| 10       | l         | 108         | 10000 + (10 * 256) + 108 = 12668         | 12668       |
+| 11       | d         | 100         | 10000 + (11 * 256) + 100 = 12916         | 12916       |
+| 12       | !         | 33          | 10000 + (12 * 256) + 33 = 13105          | 13105       |
+
+4. **Encoder Output**
+
+The encoder attempts to open each calculated port and sends a ready signal to the decoder.
+
+```
+[INFO] Attempting to open ports.
+[INFO] Control server is listening on port 9000
+[INFO] Ready signal sent to the decoder.
+[INFO] Port 10104 is open.
+[INFO] Port 10357 is open.
+[INFO] Port 10620 is open.
+[INFO] Port 10876 is open.
+[INFO] Port 11135 is open.
+[INFO] Port 11224 is open.
+[INFO] Port 11568 is open.
+[INFO] Port 11911 is open.
+[INFO] Port 12159 is open.
+[INFO] Port 12318 is open.
+[INFO] Port 12668 is open.
+[INFO] Port 12916 is open.
+[INFO] Port 13105 is open.
+```
+
+### 🔍 Decoding the Message
+
+1. **Run the Decoder Script**
+
+```
+python3 decoder.py <encoder_ip> <shared_token>
+```
+
+- **`<encoder_ip>`**: IP address of the encoder machine.
+- **`<shared_token>`**: Pre-shared secret token matching the encoder's.
+
+2. **Decoder Output**
+
+The decoder listens for the ready signal, scans the specified port range, and decodes the message.
+
+```
+[INFO] Listening for 'ready' signal on port 9001...
+[INFO] Received valid 'ready' signal from the encoder.
+[INFO] Scanning <encoder_ip> for open ports in range 10000-65535...
+[INFO] Open ports: [10104, 10357, 10620, 10876, 11135, 11224, 11568, 11911, 12159, 12318, 12668, 12916, 13105]
+[MESSAGE DECODED] Encoder says: hello, world!
+[INPUT] Do you want to confirm receipt to the encoder? y is recommended (y/n): y
+[INFO] Shutdown signal sent to the encoder.
+```
+
+3. **Decoding the Ports**
+
+Each open port is mapped back to its corresponding character using the formula:
+```
+character = chr((port - base_port) % 256)
+```
+
+| Port Number | Calculation                     | Character |
+|-------------|---------------------------------|-----------|
+| 10104       | (10104 - 10000) % 256 = 104     | h         |
+| 10357       | (10357 - 10000) % 256 = 101     | e         |
+| 10620       | (10620 - 10000) % 256 = 108     | l         |
+| 10876       | (10876 - 10000) % 256 = 108     | l         |
+| 11135       | (11135 - 10000) % 256 = 111     | o         |
+| 11224       | (11224 - 10000) % 256 = 44      | ,         |
+| 11568       | (11568 - 10000) % 256 = 32      |           |
+| 11911       | (11911 - 10000) % 256 = 119     | w         |
+| 12159       | (12159 - 10000) % 256 = 111     | o         |
+| 12318       | (12318 - 10000) % 256 = 114     | r         |
+| 12668       | (12668 - 10000) % 256 = 108     | l         |
+| 12916       | (12916 - 10000) % 256 = 100     | d         |
+| 13105       | (13105 - 10000) % 256 = 33      | !         |
+
+4. **Encoder Side After Shutdown**
+
+Upon receiving the shutdown signal, the encoder cleans up by closing all opened ports.
+
+```
+The message was read by the other party.
+Cleaning up ports by shutting them down.
+All ports have been closed.
+```
 
 ## ⚙️ Installation
 
