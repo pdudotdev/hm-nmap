@@ -17,7 +17,7 @@
     - [Encoder](#encoder-host-writing-the-message)
     - [Decoder](#decoder-host-reading-the-message)
     - [Cleanup Process](#cleanup-process)
-  - [🎓 Example: Encoding and Decoding](#)
+  - [🎓 Example: Encoding and Decoding](#-example-encoding-and-decoding)
   - [⚙️ Installation](#%EF%B8%8F-installation)
   - [📝 Usage](#-usage)
     - [Encoder Setup](#encoder-setup)
@@ -81,7 +81,7 @@
   - Ensures that no unnecessary ports remain open, maintaining system security.
   - Confirms to the encoder that the message was successfully received and decoded.
 
-## 🎓 Example: Encoding and Decoding "hello, world!"
+## 🎓 Example: Encoding and Decoding
 
 Let's walk through an example of how **HM-Nmap** encodes and decodes the message `"hello, world!"`.
 
